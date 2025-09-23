@@ -11,21 +11,26 @@
 -- Test in Codespaces (replace the server by your codespace URL):
 -- https://ideal-parakeet-p55v4xx7vx536pgw-3000.app.github.dev/hello
 
+
 import Web.Scotty
-import Network.HTTP.Types.Status (status404, status500)
+--import Network.HTTP.Types.Status (status404, status500)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import Network.Wai.Handler.Warp (HostPreference, defaultSettings, setHost, setPort)
+import Network.Wai.Middleware.Cors (cors, CorsResourcePolicy(..))
+
 import Database.SQLite.Simple
-import Database.SQLite.Simple.FromRow
+import Database.SQLite.Simple.ToField (toField)
+
 import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics (Generic)
-import Data.Text.Lazy (Text)
-import qualified Data.Text.Lazy as T
+import Data.Maybe (catMaybes)
+import qualified Data.Text as T           
+import qualified Data.Text.Lazy as LT     
+import Data.String (fromString)
+
 import Control.Monad.IO.Class (liftIO)
-import Network.Wai.Handler.Warp (HostPreference, defaultSettings, setHost, setPort)
 import System.Environment (lookupEnv)
 import Text.Read (readMaybe)
-
-
 
 
 -- === Estrutura do post ===
@@ -60,6 +65,20 @@ instance ToRow Post where
 hostAny :: HostPreference
 hostAny = "*"
 
+-- Politica de rota para CORS (POST/PUT/DELETE funcionais)
+myCorsPolicy :: CorsResourcePolicy
+myCorsPolicy = CorsResourcePolicy
+  { 
+    corsOrigins = Nothing
+  , corsMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+  , corsRequestHeaders = ["Content-Type"]
+  , corsExposedHeaders = Nothing
+  , corsMaxAge = Nothing
+  , corsVaryOrigin = False
+  , corsRequireOrigin = False
+  , corsIgnoreFailures = False
+  }
+
 -- Initialize database
 initDB :: Connection -> IO ()
 initDB conn = execute_ conn
@@ -90,46 +109,62 @@ main = do
 
   scottyOpts opts $ do
     middleware logStdoutDev
+    -- CORS para frontend
+    middleware $ cors (const $ Just myCorsPolicy)
+
     
     -- ===== Requisicoes GET =====
     -- GET /healthz (verificar se servidor esta rodando)
     get "/healthz" $ text "ok"  
 
-    -- Pagina inicial - lista todos os posts
+
+    -- Pagina inicial - lista todos os posts (DEPRECADA: query sem filtros retorna o mesmo resultado)
     -- GET /home
     get "/home" $ do
       posts <- liftIO $ query_ conn "SELECT id, name, desc, loc, date, poster, stat FROM posts" :: ActionM [Post]
       json posts
 
-    -- Lista os itens por status (lost, found, returned)
-    -- GET /posts/:status
-    get "/posts/status/:id" $ do
-      statParam <- pathParam "id" :: ActionM String
-      posts <- liftIO $ query conn "SELECT id, name, desc, loc, date, poster, stat FROM posts WHERE stat = ?" (Only statParam) :: ActionM [Post]
+
+    -- Pesquisa posts por nome, data, status ou local (multiplos filtros)
+    -- GET /posts/search?name=...&date=...&status=...&loc=...
+    get "/posts/search" $ do
+      -- NOVO: pesquisa com multiplos parametros de filtros
+      allParams <- queryParams
+      let mName = lookup "name" allParams
+          mDate = lookup "date" allParams
+          mStatus = lookup "status" allParams
+          mLoc = lookup "loc" allParams
+
+      -- Criacao de query dinamica
+      let 
+        baseQuery = "SELECT id, name, desc, loc, date, poster, stat FROM posts WHERE 1=1"
+        
+        -- Construir partes da query baseado nos parametros fornecidos
+        nameCondition = case mName of
+          Just name -> let searchTerm = "%" ++ LT.unpack name ++ "%" 
+                       in Just (" AND (name LIKE ? OR desc LIKE ?)", [toField searchTerm, toField searchTerm])
+          Nothing -> Nothing
+          
+        dateCondition = case mDate of
+          Just date -> Just (" AND date >= ?", [toField (LT.unpack date)])
+          Nothing -> Nothing
+          
+        statusCondition = case mStatus of
+          Just status -> Just (" AND stat = ?", [toField (LT.unpack status)])
+          Nothing -> Nothing
+          
+        locCondition = case mLoc of
+          Just loc -> let searchTerm = "%" ++ LT.unpack loc ++ "%"
+                      in Just (" AND loc LIKE ?", [toField searchTerm])
+          Nothing -> Nothing
+
+        activeConditions = catMaybes [nameCondition, dateCondition, statusCondition, locCondition]
+        finalQueryString = baseQuery ++ concatMap fst activeConditions
+        params = concatMap snd activeConditions
+
+      posts <- liftIO $ query conn (fromString finalQueryString) params :: ActionM [Post]
       json posts
 
-    -- Lista os itens por data (do mais recente ao mais antigo) a partir de uma data
-    -- GET /posts/date/:date
-    get "/posts/date/:date" $ do
-      dateParam <- pathParam "date" :: ActionM String
-      posts <- liftIO $ query conn "SELECT id, name, desc, loc, date, poster, stat FROM posts WHERE date >= ? ORDER BY date DESC" (Only dateParam) :: ActionM [Post]
-      json posts
-
-    -- Lista os itens pelo nome pesquisado
-    -- GET /posts/search/:name
-    get "/posts/search/:name" $ do
-      nameParam <- pathParam "name" :: ActionM String
-      let searchPattern = "%" ++ nameParam ++ "%"
-      posts <- liftIO $ query conn "SELECT id, name, desc, loc, date, poster, stat FROM posts WHERE name LIKE ?" (Only searchPattern) :: ActionM [Post]
-      json posts
-
-    -- Lista itens pelo local pesquisado
-    -- GET /posts/location/:loc
-    get "/posts/location/:loc" $ do
-      locParam <- pathParam "loc" :: ActionM String
-      let searchPattern = "%" ++ locParam ++ "%"
-      posts <- liftIO $ query conn "SELECT id, name, desc, loc, date, poster, stat FROM posts WHERE loc LIKE ?" (Only searchPattern) :: ActionM [Post]
-      json posts
 
     -- ===== Requisicoes POST =====
     -- Cria post novo de item perdido/encontrado
@@ -139,6 +174,7 @@ main = do
       liftIO $ execute conn "INSERT INTO posts (name, desc, loc, date, poster, stat) VALUES (?, ?, ?, ?, ?, ?)" (itemName post, itemDesc post, itemLoc post, itemDate post, posterName post, stat post)
       rowId <- liftIO $ lastInsertRowId conn
       json ("Post criado com id: " ++ show rowId)
+
 
     -- ===== Requisicoes PUT =====
     -- Atualiza post de item apenas modificando o status de perdido/encontrado como devolvido

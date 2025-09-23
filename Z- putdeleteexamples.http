@@ -1,5 +1,5 @@
 
-PUT http://localhost:3000/posts/2
+PUT http://localhost:3000/posts/3
 Content-Type: application/json
 
 ###
