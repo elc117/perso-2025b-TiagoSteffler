@@ -1,0 +1,48 @@
+
+GET http://localhost:3000/home
+Content-Type: application/json
+
+###
+
+GET http://localhost:3000/posts/status/Perdido
+Content-Type: application/json
+
+###
+
+GET http://localhost:3000/posts/status/Encontrado
+Content-Type: application/json
+
+###
+
+GET http://localhost:3000/posts/status/Devolvido
+Content-Type: application/json
+
+###
+
+GET http://localhost:3000/posts/search/Pulseira
+Content-Type: application/json
+
+###
+
+GET http://localhost:3000/posts/search/Academia
+Content-Type: application/json
+
+###
+
+GET http://localhost:3000/posts/date/2025-09-11
+Content-Type: application/json
+
+###
+
+GET http://localhost:3000/posts/date/2025-09-15
+Content-Type: application/json
+
+###
+
+GET http://localhost:3000/posts/location/Shopping
+Content-Type: application/json
+
+###
+
+GET http://localhost:3000/posts/location/Praça
+Content-Type: application/json

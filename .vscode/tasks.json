@@ -1,0 +1,41 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "cabal test",
+			"type": "shell",
+			"command": "cabal",
+			"args": [
+				"test"
+			],
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "cabal test",
+			"type": "shell",
+			"command": "cabal",
+			"args": [
+				"test"
+			],
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "cabal test",
+			"type": "shell",
+			"command": "cabal",
+			"args": [
+				"test"
+			],
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		}
+	]
+}

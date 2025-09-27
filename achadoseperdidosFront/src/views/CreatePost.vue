@@ -30,7 +30,7 @@ async function submitPost() {
 </script>
 
 <template>
-  <div>
+  <div class="container">
     <h2>Cadastrar Novo Item</h2>
     <form @submit.prevent="submitPost">
       <input type="text" v-model="newItem.itemName" placeholder="Nome do item" required><br>
@@ -49,5 +49,71 @@ async function submitPost() {
 </template>
 
 <style scoped>
-form { display: flex; flex-direction: column; gap: 10px; max-width: 400px; }
+.container {
+  color: #333;
+  max-width: 480px;
+  margin: auto;
+}
+
+h2 {
+  background-color: #f2f3f5;
+  color: #1f2937;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 480px;
+  background: #f7f7f7;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+input[type="text"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  background-color: #fff;
+  border-radius: 6px;
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+textarea { min-height: 90px; }
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+}
+
+button[type="submit"] {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  background-color: #4caf50;
+  color: #fff;
+  transition: transform 0.05s ease, filter 0.15s ease;
+}
+
+button[type="submit"]:hover { filter: brightness(0.95); }
+button[type="submit"]:active { transform: translateY(1px); }
+
+p {
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
 </style>

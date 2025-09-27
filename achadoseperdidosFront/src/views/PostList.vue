@@ -100,7 +100,7 @@ onMounted(fetchAllPosts)
       <form @submit.prevent="performSearch" class="filter-form">
         <div class="form-group">
           <label for="name">Nome do Item</label>
-          <input type="text" id="name" v-model.trim="filterName" placeholder="Ex: Garrafa de água...">
+          <input type="text" id="name" v-model.trim="filterName" placeholder="Ex: Garrafa de água">
         </div>
         <div class="form-group">
           <label for="date">A partir da Data</label>
@@ -128,7 +128,6 @@ onMounted(fetchAllPosts)
     </aside>
 
     <main class="content-area">
-      <h1>Itens Achados e Perdidos</h1>
       <div v-if="error">{{ error }}</div>
       
       <div v-else-if="posts.length > 0" class="post-list">
@@ -138,7 +137,7 @@ onMounted(fetchAllPosts)
           <p><strong>Local:</strong> {{ post.itemLoc }} | <strong>Data:</strong> {{ post.itemDate }}</p>
           <p><strong>Postado por:</strong> {{ post.posterName }}</p>
           <div class="actions">
-            <button @click="markAsReturned(post.postId)" v-if="post.stat !== 'Devolvido'">Marcar como Devolvido</button>
+            <button @click="markAsReturned(post.postId)" v-if="post.stat !== 'Devolvido'" class="return-btn">Marcar como Devolvido</button>
             <button @click="deletePost(post.postId)" class="delete-btn">Apagar</button>
           </div>
         </div>
@@ -154,30 +153,49 @@ onMounted(fetchAllPosts)
 .page-container {
   display: flex;
   gap: 2rem;
+  color: #333;
 }
 
 .filter-sidebar {
   flex: 0 0 280px;
   padding: 1rem;
   border-right: 1px solid #eee;
+  background-color: #fff;
+}
+
+.filter-form {
+  width: 100%;
 }
 
 .filter-form .form-group {
+  width: 100%;
   margin-bottom: 1rem;
 }
 
 .filter-form label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: bold;
+  font-weight: 600;
+  color: #444;
 }
 
 .filter-form input,
 .filter-form select {
+  display: block;
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  background-color: #fff;
+  border-radius: 6px;
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.filter-form input:focus,
+.filter-form select:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
 }
 
 .button-group {
@@ -185,36 +203,114 @@ onMounted(fetchAllPosts)
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  width: 100%;
 }
 
 .button-group button {
-  padding: 10px;
+  padding: 10px 12px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
+  transition: transform 0.05s ease, filter 0.15s ease;
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
+.button-group button:hover {
+  filter: brightness(0.95);
+}
+
+.button-group button:active {
+  transform: translateY(1px);
 }
 
 .search-btn {
-  background-color: #4CAF50;
-  color: white;
+  background-color: #4caf50;
+  color: #fff;
 }
 
 .clear-btn {
   background-color: #f44336;
-  color: white;
+  color: #fff;
 }
-
 
 .content-area {
   flex-grow: 1;
 }
 
-.post-list { display: flex; flex-direction: column; gap: 1rem; }
-.post-card { border: 1px solid #ccc; padding: 1rem; border-radius: 8px; }
-.actions button { margin-right: 8px; }
-.delete-btn { background-color: #ff4d4d; color: white; }
-.perdido { color: red; }
-.encontrado { color: green; }
-.devolvido { color: blue; }
+.content-area h1 {
+  background-color: #f2f3f5;
+  color: #1f2937;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  margin: 0 0 1rem 0;
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-card {
+  background-color: #f7f7f7;
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.actions button {
+  margin-right: 8px;
+}
+
+.delete-btn {
+  background-color: #ff4d4d;
+  color: #fff;
+  border-radius: 10px;
+  border: none;
+  line-height: 2;
+}
+
+.return-btn {
+  background-color: #cfcfcf;
+  color: #000;
+  border-radius: 10px;
+  border: none;
+  line-height: 2;
+}
+
+.perdido,
+.encontrado,
+.devolvido {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.perdido {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.encontrado {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.devolvido {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
 </style>
