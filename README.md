@@ -21,7 +21,7 @@ Esse projeto consiste na criação de um sistema simples de achados e perdidos d
   
 Utilizou-se ```axios``` no frontend para poder efetuar as requisições PUT/POST/DELETE de forma adequada. No entanto, para que o backend e o frontend pudessem "conversar" sem ser o navegador bloquear esse tipo de requisição (já que se localizam em locais/portas diferentes), adicionou-se uma lib ```wai-cors``` no backend para permitir esse tipo de requisição.
 
-Os testes da API foram realizados utilizando Hspec. Para isso, o código da Main foi modificado para comportar esse tipo de teste, exportando a lógica para App.hs e o setup do servidor para Main.hs. Os testes são feitos pelo arquivo [Hspec-tests.hs](Hspec-tests.hs) com ou sem o backend ativo (ver abaixo).
+Os testes da API foram realizados utilizando Hspec. Para isso, o código da Main foi modificado para comportar esse tipo de teste, exportando a lógica para App.hs e o setup do servidor para Main.hs. Os testes são feitos pelo arquivo [Hspec-tests.hs](test/HSpec_test.hs) com ou sem o backend ativo (ver abaixo).
 
 ## Como executar
 
@@ -71,6 +71,6 @@ Adição de informações adicionais sobre o projeto e refinamento do filtro de 
 
 ### 27/09/2025
 
-Revisão final do código e implementação de testes com Hspec. Para isso, o arquivo principal foi dividido entre [App.hs](App.hs) (possui a lógica da API) e [Main.hs](Main.hs) (programa que é executado no ```cabal run``` e que configura o servidor em Scotty) para possibilitar esses testes. Não houve implementação de controle de usuário por aumentar a complexidade geral do código. README e configuração do cabal atualizados e organização geral dos códigos.
+Revisão final do código e implementação de testes com Hspec. Para isso, o arquivo principal foi dividido entre [App.hs](src/App.hs) (possui a lógica da API) e [Main.hs](src/Main.hs) (programa que é executado no ```cabal run``` e que configura o servidor em Scotty) para possibilitar esses testes. Não houve implementação de controle de usuário por aumentar a complexidade geral do código. README e configuração do cabal atualizados e organização geral dos códigos.
 
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/7NMOLXjY)
